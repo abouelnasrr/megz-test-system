@@ -1,0 +1,80 @@
+{% extends 'shop/base.html' %} {% block content %}
+<div class="container receipt-container">
+    <div class="receipt">
+        <h2 class="text-center">Order Receipt</h2>
+
+        <p><strong>Name:</strong> {{ order.name }}</p>
+        <p><strong>Mobile:</strong> {{ order.mobile }}</p>
+        <p><strong>Address:</strong> {{ order.address }}</p>
+        <p><strong>ID Number:</strong> {{ order.id_number }}</p>
+        <!-- ✅ Display notes -->
+        <p><strong>Notes:</strong> {{ order.notes }}</p>
+        <p><strong>Date:</strong> {{ order.created_at|date:"Y-m-d H:i" }}</p>
+
+        <h4>Order Summary</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <!-- <th>Colors</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items_list %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unitPrice }}</td>
+                    <td>${{ item.totalPrice }}</td>
+                    <!-- <td>
+                        {% for color in product.colors %} Color: {{ color.color }} - {{ color.quantity }} item(s)<br> {% empty %} No color assigned {% endfor %}
+                    </td> -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4 class="text-right">Total: ${{ order.total }}</h4>
+
+        <div class="text-center no-print">
+            <button onclick="window.print()" class="btn btn-primary">Print Receipt</button>
+            <a href="{% url 'receipts' %}" class="btn btn-secondary">View All Receipts</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .receipt-container {
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+    }
+    
+    @media print {
+        /* body {
+            -webkit-print-color-adjust: exact;
+            /* ✅ Ensures correct color in print */
+        /* print-color-adjust: exact; */
+        /* ✅ Ensures color accuracy */
+        .receipt-container,
+        .table {
+            color: black !important;
+            /* ✅ Force black text */
+        }
+        */ .no-print {
+            display: none;
+        }
+        .table th,
+        .table td {
+            color: black !important;
+            /* ✅ Table text turns black when printing */
+            /* border: 1px solid black !important; */
+            /* ✅ Make borders black */
+        }
+    }
+</style>
+
+{% endblock %}

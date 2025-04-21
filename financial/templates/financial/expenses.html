@@ -1,0 +1,144 @@
+{% extends 'shop/base.html' %} {% load static %} {% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">💸 Expenses Dashboard</h2>
+
+    <!-- 📋 Add Expense Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Add New Expense</div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %} {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Submit Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🔍 Search -->
+    <form method="get" class="mb-3">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search expenses..." class="form-control">
+    </form>
+
+    <!-- 📊 Expenses Table -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">All Expense Records</div>
+        <div class="card-body">
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.name }}</td>
+                        <td>{{ expense.expense_type }}</td>
+                        <td>${{ expense.amount }}</td>
+                        <td>{{ expense.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#receiptModal{{ expense.id }}" style="color: black;">View</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if expenses.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ expenses.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">{{ expenses.number }}</span>
+                    </li>
+
+                    {% if expenses.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ expenses.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- 🔁 Render modals below the table so they are not inside <tr> -->
+{% for expense in expenses %}
+<div class="modal fade" id="receiptModal{{ expense.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Expense Receipt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receipt{{ expense.id }}">
+                <p><strong>Name:</strong> {{ expense.name }}</p>
+                <p><strong>Type:</strong> {{ expense.expense_type }}</p>
+                <p><strong>Amount:</strong> ${{ expense.amount }}</p>
+                <p><strong>Date:</strong> {{ expense.created_at|date:"Y-m-d H:i" }}</p>
+                {% if expense.notes %}
+                <p><strong>Notes:</strong> {{ expense.notes }}</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary print-btn" data-id="{{ expense.id }}">Print</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<style>
+    .modal-content {
+        color: black !important;
+        background-color: white !important;
+    }
+    
+    .modal-body {
+        color: black !important;
+    }
+</style>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".print-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                const id = this.getAttribute("data-id");
+                const content = document.getElementById("receipt" + id).cloneNode(true);
+
+                const printWindow = window.open('', '', 'width=800,height=600');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Print Receipt</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; color: black; padding: 20px; }
+                        </style>
+                    </head>
+                    <body></body>
+                    </html>
+                `);
+
+                printWindow.document.close();
+                printWindow.document.body.appendChild(content);
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            });
+        });
+    });
+</script>
+{% include 'includes/dashbase.html' %} {% endblock %}

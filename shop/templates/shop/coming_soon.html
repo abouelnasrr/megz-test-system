@@ -1,0 +1,111 @@
+{% extends 'shop/base.html' %} {% block content %}
+<style>
+    /* Snowflake Animation */
+    
+    @keyframes snowfall {
+        from {
+            transform: translateY(0px);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(800px);
+            opacity: 0;
+        }
+    }
+    /* Background with Snowflakes */
+    
+    body {
+        background: url("https://cdn.pixabay.com/photo/2017/08/30/07/52/winter-2695078_1280.jpg") no-repeat center center fixed;
+        background-size: cover;
+        text-align: center;
+        color: white;
+        font-family: Arial, sans-serif;
+        position: relative;
+        overflow: hidden;
+    }
+    /* Coming Soon Text */
+    
+    .coming-soon {
+        font-size: 6rem;
+        /* ✅ Bigger Font */
+        font-weight: bold;
+        animation: pulse 1.5s infinite alternate;
+        background: linear-gradient(to right, #f8ff00, #3ad59f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        margin-top: 100px;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+    /* Features List */
+    
+    .features-list {
+        font-size: 1.2rem;
+        color: white;
+        text-align: left;
+        max-width: 600px;
+        margin: auto;
+        padding-top: 20px;
+    }
+    
+    .features-list ul {
+        list-style-type: disc;
+    }
+    /* Snowflakes */
+    
+    .snowflake {
+        position: absolute;
+        top: -10px;
+        background: white;
+        border-radius: 50%;
+        opacity: 0.8;
+        animation: snowfall 10s linear infinite;
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="coming-soon">Coming Soon</h1>
+    <div class="features-list">
+        <h3>Upcoming Features:</h3>
+        <ul>
+            <li>🚀 Live chat bots & support</li>
+            <li>🛒 Advanced inventory management</li>
+            <li>💳 Visa payment integration</li>
+            <li>📦 Purchasing receipts</li>
+            <li>📦 Alert before stock expires</li>
+            <li>📊 Total statistics calculations</li>
+            <li>🎨 Material & stock planning</li>
+            <li>🎨 peticash and financial dashboard</li>
+            <li>🎨 Created by: Aly AbouElnasr</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function createSnowflake() {
+        let snowflake = document.createElement("div");
+        snowflake.classList.add("snowflake");
+        snowflake.style.width = snowflake.style.height = Math.random() * 10 + "px";
+        snowflake.style.left = Math.random() * window.innerWidth + "px";
+        snowflake.style.animationDuration = (Math.random() * 5 + 5) + "s";
+        document.body.appendChild(snowflake);
+
+        setTimeout(() => {
+            snowflake.remove();
+        }, 10000); // Remove after animation
+    }
+
+    setInterval(createSnowflake, 200); // Generate snowflakes
+</script>
+
+{% endblock %}

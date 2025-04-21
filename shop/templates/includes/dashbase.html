@@ -1,0 +1,40 @@
+<!-- templates/includes/dahbase.html -->
+
+<!-- Toggle Button -->
+<div id="menu-toggler" style="position: fixed; top: 50%; right: 0; transform: translateY(-50%); z-index: 9999;">
+    <button onclick="toggleMenu()" style="background-color: #343a40; color: white; border: none; padding: 10px 15px; border-radius: 5px 0 0 5px;">
+        ☰ Menu
+    </button>
+</div>
+
+<!-- Sliding Menu -->
+<div id="side-menu" style="
+    position: fixed;
+    top: 0;
+    right: -300px;
+    height: 100%;
+    width: 300px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    transition: right 0.3s ease;
+    z-index: 9998;
+    padding: 20px;
+">
+    <h5>Dashboard Navigation</h5>
+    <hr style="border-color: #ccc;">
+    <!-- <a href="#" class="btn btn-light w-100 mb-2">Change Stock Amount</a> -->
+    <a href="{% url 'inventory_page' %}" class="btn btn-warning w-100 mb-2">Inventory Dashboard</a>
+    <a href="{% url 'operations_dashboard' %}" class="btn btn-light w-100 mb-2">Operations Dashboard</a>
+    <a href="{% url 'expenses_page' %}" class="btn btn-primary w-100 mb-2">Expenses Dashboard</a>
+    <a href="{% url 'financial_page' %}" class="btn btn-info w-100 mb-2">Financial Dashboard</a>
+    <a href="{% url 'users_dashboard' %}" class="btn btn-danger w-100 mb-2">Users Dashboard</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-success w-100 mb-2">Products Dashboard</a>
+</div>
+
+<!-- Toggle JavaScript -->
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById("side-menu");
+        menu.style.right = (menu.style.right === "0px") ? "-300px" : "0px";
+    }
+</script>

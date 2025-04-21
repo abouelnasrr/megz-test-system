@@ -1,0 +1,59 @@
+{% extends 'shop/base.html' %} {% block content %}
+<div class="container">
+    <h2 class="text-center">All Receipts</h2>
+
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'receipts' %}" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search_query" class="form-control" placeholder="Search by Name or Date (YYYY-MM-DD)" value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="{% url 'receipts' %}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    {% if orders %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>View</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                <td>${{ order.total }}</td>
+                <td><a href="{% url 'receipt' order.id %}" class="btn btn-info btn-sm">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if orders.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ orders.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item disabled"><a class="page-link">Page {{ orders.number }} of {{ orders.paginator.num_pages }}</a></li>
+
+            {% if orders.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ orders.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ orders.paginator.num_pages }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    {% else %}
+    <p class="text-center">No receipts found.</p>
+    {% endif %}
+</div>
+{% endblock %}

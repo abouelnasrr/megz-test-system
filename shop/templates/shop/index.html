@@ -1,0 +1,181 @@
+{% extends 'shop/base.html' %} {% block content %}
+
+
+<div class="container">
+
+    <!-- <div class="row ">
+            <div class="col-md-12">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <a class="navbar-brand" href="#">ABC Shopping</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Features</a>
+                            </li>
+                            <li class="nav-item">
+                                <button id="cart" data-html="true" type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus
+                            sagittis lacus vel augue laoreet rutrum faucibus.">
+                              Cart(0)
+                            </button>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link disabled" href="#">Disabled</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div> -->
+
+    <div class="row m-5">
+        <div class="col-md-12">
+            <form class="card card-sm" method="GET" action="{% url 'index' %}">
+                <div class="card-body row no-gutters align-items-center">
+                    <div class="col">
+                        <input type="search" name="item_name" value="{{ query }}" placeholder="Search for products" class="form-control form-control-borderless">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success" type="submit">Search</button> {% if query %}
+                        <a href="{% url 'index' %}" class="btn btn-danger">Clear</a> {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <div class="container mt-4">
+        <div class="row">
+            {% for product in product_objects %}
+            <div class="col-lg-3 col-md-4 col-sm-6 d-flex align-items-stretch">
+                <!-- Ensures 4 cards per row and equal height -->
+                <div class="card shadow-sm w-100">
+                    <div class="image-frame">
+                        <img src="{{ product.image }}" class="card-img-top product-img" style="height: 200px; object-fit: cover;" alt="{{ product.title }}">
+                    </div>
+                    <div class="card-body d-flex flex-column" style="color: black;">
+                        <h5 class=" card-title text-center">{{ product.title }}</h5>
+                        <p class="card-text text-center">{{ product.description|truncatewords:10 }}</p>
+                        <p class="text-center" style="color: green; "><strong>Price:</strong> ${{ product.price }}</p>
+                        <p class="text-center"><strong>Stock:</strong> {{ product.stock }}</p>
+                        <!-- Show Stock -->
+
+                        <!-- Quantity Input Field -->
+                        <div class="mt-auto">
+                            <input type="number" id="quantity-{{ product.id }}" class="form-control mb-2 text-center" value="1" min="1" max="{{ product.stock }}"> {% if product.stock > 0 %}
+                            <button id="add-to-cart-{{ product.id }}" class="btn btn-success add-to-cart w-100">Add to Cart</button> {% else %}
+                            <button class="btn btn-danger w-100" disabled>Out of Stock</button> {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <!-- Pagination Controls -->
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <ul class="pagination">
+                {% if product_objects.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ product_objects.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <a class="page-link" href="?page={{ product_objects.number }}">{{ product_objects.number }}</a>
+                </li>
+
+                {% if product_objects.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ product_objects.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript ">
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".add-to-cart").forEach(button => {
+            button.addEventListener("click", function() {
+                let productId = this.id.replace("add-to-cart-", "");
+                let quantity = document.getElementById(`quantity-${productId}`).value;
+
+                fetch(`/add_to_cart/${productId}/${quantity}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(`You can't add more than ${data.product_stock} items of this product.`);
+                        } else {
+                            document.getElementById("cart-count").innerText = data.cart_count;
+                            document.getElementById(`quantity-${productId}`).value = 1; // Reset to 1
+                        }
+                    })
+
+                // .catch(error => console.error("Error adding to cart:", error));
+            });
+        });
+    });
+    console.log('This is working');
+
+    if (localStorage.getItem('cart') == null) {
+        var cart = {};
+    } else {
+        cart = JSON.parse(localStorage.getItem('cart'));
+    }
+
+    $(document).on('click', '.atc', function() {
+        console.log("The add to cart button is clicked ");
+        var item_id = this.id.toString();
+        console.log(item_id);
+
+        if (cart[item_id] != undefined) {
+            quantity = cart[item_id][0] + 1;
+            cart[item_id][0] = quantity;
+            cart[item_id][2] = cart[item_id][2] + parseFloat(document.getElementById("price " + item_id).innerHTML);
+
+
+        } else {
+            quantity = 1;
+            price = parseFloat(document.getElementById("price " + item_id).innerHTML);
+            name = document.getElementById("nm " + item_id).innerHTML;
+            cart[item_id] = [quantity, name, price];
+
+
+        }
+        console.log(cart);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        document.getElementById("cart ").innerHTML = "Cart( " + Object.keys(cart).length + ") ";
+
+    });
+
+    DisplayCart(cart);
+
+    function DisplayCart(cart) {
+        var cartString = " ";
+        cartString += "<h5>This is your cart</h5>";
+        var cartIndex = 1;
+        for (var x in cart) {
+            cartString += cartIndex + ". ";
+            cartString += document.getElementById("nm" + x).innerHTML + "Qty:" + cart[x][0] + "</br>";
+            cartIndex += 1;
+        }
+        cartString += "<a href ='/checkout'><button class ='btn btn-warning' id ='checkout'>Checkout</button></a>";
+        document.getElementById("cart").setAttribute('data-content', cartString);
+        $('[data-toggle="popover"]').popover();
+    }
+</script>
+
+
+{% endblock %}

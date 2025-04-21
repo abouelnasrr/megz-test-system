@@ -1,0 +1,83 @@
+{% extends 'shop/base.html' %} {% load static %} {% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">📦 Inventory Dashboard</h2>
+
+    <!-- 🟡 Warning Alerts FIRST -->
+    {% if yellow_alerts %}
+    <div class="alert alert-warning">
+        <h5>⚠️ Low Stock Warning:</h5>
+        <ul>
+            {% for product in yellow_alerts %}
+            <li><strong>{{ product.title }}</strong> (Stock: {{ product.stock }})</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- 🔴 Red Alerts AFTER -->
+    {% if red_alerts %}
+    <div class="alert alert-danger">
+        <h5>🚨 Out of Stock Products:</h5>
+        <ul>
+            {% for product in red_alerts %}
+            <li><strong>{{ product.title }}</strong> (Stock: 0)</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- 📝 Add Stock Warning Limit -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Set Stock Warning Limit</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %} {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Save Limit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📋 Stock Warning Table -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5>Current Stock Warnings</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Product</th>
+                        <th>Stock</th>
+                        <th>Warning Limit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sw in stock_warnings %}
+                    <tr {% if sw.product in red_alerts %} style="background-color: #8B0000; color: white;" <!-- 🔥 Dark red for critical products -->
+                        {% elif sw.product in yellow_alerts %} style="background-color: #ff7300;"
+                        <!-- 🟡 Yellow for warnings -->
+                        {% endif %} >
+                        <td>{{ sw.product.title }}</td>
+                        <td>{{ sw.product.stock }}</td>
+                        <td>{{ sw.warning_limit }}</td>
+                        <td>
+                            <form method="post" action="{% url 'delete_warning' sw.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No stock warning limits set yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% include 'includes/dashbase.html' %} {% endblock %}

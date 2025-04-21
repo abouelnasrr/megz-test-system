@@ -1,0 +1,158 @@
+{% extends 'shop/base.html' %} {% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">🗨️ Operations Dashboard</h2>
+
+    <!-- Chat Area -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">💬 Chat (expires in 24 hours)</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'post_chat_message' %}">
+                {% csrf_token %}
+                <textarea name="message" class="form-control mb-2" placeholder="Type a message..." required></textarea>
+                <button type="submit" class="btn btn-success">Send</button>
+            </form>
+            <hr> {% for msg in messages %}
+            <div class="mb-2 chat-message" data-id="{{ msg.id }}" data-remaining="{{ msg.remaining_seconds }}">
+                <strong>{{ msg.message }}</strong><br>
+                <small class="text-muted">Expires in: <span id="timer-{{ msg.id }}"></span></small>
+            </div>
+            <!-- <script>
+                let remaining_ {
+                    {
+                        msg.id
+                    }
+                } = {
+                    {
+                        msg.remaining_seconds
+                    }
+                };
+                const timerEl_ {
+                    {
+                        msg.id
+                    }
+                } = document.getElementById("timer{{ msg.id }}");
+
+                function updateTimer_ {
+                    {
+                        msg.id
+                    }
+                }() {
+                    if (remaining_ {
+                            {
+                                msg.id
+                            }
+                        } <= 0) {
+                        timerEl_ {
+                            {
+                                msg.id
+                            }
+                        }.innerText = "Expired";
+                    } else {
+                        let hours = Math.floor(remaining_ {
+                                {
+                                    msg.id
+                                }
+                            }
+                            / 3600);
+                            let minutes = Math.floor((remaining_ {
+                                {
+                                    msg.id
+                                }
+                            } % 3600) / 60);
+                            let seconds = remaining_ {
+                                {
+                                    msg.id
+                                }
+                            } % 60; timerEl_ {
+                                {
+                                    msg.id
+                                }
+                            }.innerText = `${hours}h ${minutes}m ${seconds}s`; remaining_ {
+                                {
+                                    msg.id
+                                }
+                            }--; setTimeout(updateTimer_ {
+                                {
+                                    msg.id
+                                }
+                            }, 1000);
+                        }
+                    }
+
+                    updateTimer_ {
+                        {
+                            msg.id
+                        }
+                    }();
+            </script>  -->
+            {% empty %}
+            <p class="text-muted">No messages yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Chatbot Button -->
+    <div class="text-center mb-4">
+        <button class="btn btn-outline-dark" onclick="alert('AI chatbot coming soon 😄')">
+            🤖 Open AI Dashboard Chatbot
+        </button>
+    </div>
+
+    <!-- Announcements -->
+    <div class="card">
+        <div class="card-header bg-warning">📢 Announcements</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'post_announcement' %}">
+                {% csrf_token %}
+                <input type="text" name="name" class="form-control mb-2" placeholder="Your name" required>
+                <textarea name="message" class="form-control mb-2" placeholder="Announcement..." required></textarea>
+                <button type="submit" class="btn btn-primary">Announce</button>
+            </form>
+            <hr>
+            <h5>📋 Recent Announcements</h5>
+            <ul class="list-group">
+                {% for a in announcements %}
+                <li class="list-group-item">{{ a.name }} says: {{ a.message }}</li>
+                {% empty %}
+                <li class="list-group-item text-muted">No announcements yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const chatMessages = document.querySelectorAll(".chat-message");
+
+        chatMessages.forEach(function(msgEl) {
+            const id = msgEl.getAttribute("data-id");
+            let remaining = parseInt(msgEl.getAttribute("data-remaining"));
+            const timerEl = document.getElementById("timer-" + id);
+            const chatBox = document.getElementById("chat-msg-" + id);
+
+            function updateTimer() {
+                if (remaining <= 0) {
+                    // Animate then remove message
+                    chatBox.style.transition = "opacity 1s ease";
+                    chatBox.style.opacity = "0";
+                    setTimeout(() => chatBox.remove(), 1000);
+                } else {
+                    const h = Math.floor(remaining / 3600);
+                    const m = Math.floor((remaining % 3600) / 60);
+                    const s = remaining % 60;
+                    timerEl.innerText = `${h}h ${m}m ${s}s`;
+
+                    remaining--;
+                    setTimeout(updateTimer, 1000);
+                }
+            }
+
+            updateTimer();
+        });
+    });
+</script>
+
+{% include 'includes/dashbase.html' %} {% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'shop/base.html' %} {% block content %}
+<div class="container" style="padding-top: 30px;">
+    <h2 class="text-center">Cart</h2>
+    <p class="text-center">Please check your cart items.</p>
+</div>
+{% if cart_items %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Delete</th>
+            <!-- <th>Colors</th>
+            <th>Action</th> -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr id="row-{{ item.product.id }}">
+            <td>{{ item.product.title }}</td>
+            <td>${{ item.product.price }}</td>
+            <td>
+                <button class="btn btn-sm btn-danger decrease-qty" data-id="{{ item.product.id }}">-</button>
+                <span id="qty-{{ item.product.id }}">{{ item.quantity }}</span>
+                <button class="btn btn-sm btn-success increase-qty" data-id="{{ item.product.id }}">+</button>
+            </td>
+            <td id="total-{{ item.product.id }}">${{ item.total_price }}</td>
+            <td>
+                <button class="btn btn-sm btn-danger delete-item" data-id="{{ item.product.id }}">Delete</button>
+            </td>
+            <!-- <td>
+                {% for color in product.colors %} Color: {{ color.color }} - {{ color.quantity }} item(s)<br> {% empty %}
+                <span style="color: red;">No color assigned</span> {% endfor %}
+            </td>
+            <td>
+                <button class="open-color-modal btn btn-primary" data-id="{{ product.id }}">ID-Color</button>
+            </td> -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<h4 class="text-right">Total: ${{ total }}</h4>
+{% else %}
+<p class="text-center">Your cart is empty.</p>
+{% endif %}
+<a href="{% url 'finalize_order' %}" class="btn btn-primary">Finalizing Order</a>
+
+
+<!-- Modal
+<div id="colorModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Colors</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="colorForm">
+                    <input type="hidden" id="colorProductId">
+                    <label>Color 1:</label>
+                    <input type="text" class="form-control" id="color1" placeholder="Enter color">
+                    <label>Quantity:</label>
+                    <input type="number" class="form-control" id="qty1" min="1">
+
+                    <label>Color 2:</label>
+                    <input type="text" class="form-control" id="color2" placeholder="Enter color (optional)">
+                    <label>Quantity:</label>
+                    <input type="number" class="form-control" id="qty2" min="1">
+
+                    <button type="button" class="btn btn-success mt-3" id="saveColor">Save Colors</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+ -->
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function updateCartUI(productId, newQty, newTotal, cartCount, grandTotal) {
+            let row = document.getElementById(`row-${productId}`);
+            if (newQty === 0) {
+                if (row) row.remove();
+            } else {
+                document.getElementById(`qty-${productId}`).innerText = newQty;
+                document.getElementById(`total-${productId}`).innerText = `$${newTotal.toFixed(2)}`;
+            }
+            document.getElementById("cart-count").innerText = cartCount;
+            document.getElementById("cart-total").innerText = `$${grandTotal.toFixed(2)}`;
+        }
+
+        // Increase Quantity
+        document.body.addEventListener("click", function(event) {
+            if (event.target.classList.contains("increase-qty")) {
+                let productId = event.target.getAttribute("data-id");
+
+                fetch(`/increase_quantity/${productId}/`)
+                    .then(response => response.json())
+                    .then(data => updateCartUI(productId, data.new_qty, data.new_total, data.cart_count, data.grand_total))
+                    .catch(error => console.error("Error increasing quantity:", error));
+            }
+        });
+
+        // Decrease Quantity
+        document.body.addEventListener("click", function(event) {
+            if (event.target.classList.contains("decrease-qty")) {
+                let productId = event.target.getAttribute("data-id");
+
+                fetch(`/decrease_quantity/${productId}/`)
+                    .then(response => response.json())
+                    .then(data => updateCartUI(productId, data.new_qty, data.new_total, data.cart_count, data.grand_total))
+                    .catch(error => console.error("Error decreasing quantity:", error));
+            }
+        });
+
+        // Remove Item from Cart
+        document.body.addEventListener("click", function(event) {
+            if (event.target.classList.contains("delete-item")) {
+                let productId = event.target.getAttribute("data-id");
+
+                fetch(`/remove_from_cart/${productId}/`)
+                    .then(response => response.json())
+                    .then(() => {
+                        let row = document.getElementById(`row-${productId}`);
+                        if (row) row.remove();
+                        fetch("/get_cart_count/")
+                            .then(response => response.json())
+                            .then(data => document.getElementById("cart-count").innerText = data.cart_count);
+                        fetch("/cart_total/")
+                            .then(response => response.json())
+                            .then(data => document.getElementById("cart-total").innerText = `$${data.total.toFixed(2)}`);
+                    })
+                    .catch(error => console.error("Error removing item:", error));
+            }
+        });
+    });
+
+
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     let selectedProductId = null;
+
+    //     // Open modal when clicking "ID-Color" button
+    //     document.body.addEventListener("click", function(event) {
+    //         if (event.target.classList.contains("open-color-modal")) {
+    //             selectedProductId = event.target.getAttribute("data-id");
+    //             if (!selectedProductId) {
+    //                 alert("Error: Product ID is missing!");
+    //                 return;
+    //             }
+    //             document.getElementById("colorProductId").value = selectedProductId;
+    //             $("#colorModal").modal("show");
+    //         }
+    //     });
+
+    //     // Save colors
+    //     document.getElementById("saveColor").addEventListener("click", function() {
+    //         let productId = document.getElementById("colorProductId").value;
+    //         let color1 = document.getElementById("color1").value.trim();
+    //         let qty1 = document.getElementById("qty1").value.trim();
+    //         let color2 = document.getElementById("color2").value.trim();
+    //         let qty2 = document.getElementById("qty2").value.trim();
+
+    //         if (!productId) {
+    //             alert("Error: No product selected.");
+    //             return;
+    //         }
+
+    //         if (!color1 || isNaN(qty1) || qty1 <= 0) {
+    //             alert("Error: Please enter a valid color and quantity.");
+    //             return;
+    //         }
+
+    //         let colors = [{
+    //             "color": color1,
+    //             "quantity": parseInt(qty1)
+    //         }];
+    //         if (color2 && qty2 > 0) {
+    //             colors.push({
+    //                 "color": color2,
+    //                 "quantity": parseInt(qty2)
+    //             });
+    //         }
+
+    //         fetch("/assign_colors/", {
+    //                 method: "POST",
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                     "X-CSRFToken": getCookie("csrftoken")
+    //                 },
+    //                 body: JSON.stringify({
+    //                     product_id: productId,
+    //                     colors: colors
+    //                 })
+    //             })
+    //             .then(response => response.json())
+    //             .then(data => {
+    //                 alert("Colors assigned successfully!");
+    //                 $("#colorModal").modal("hide");
+    //             })
+    //             .catch(error => console.error("Error:", error));
+    //     });
+
+    //     // Get CSRF token function
+    //     function getCookie(name) {
+    //         let cookieValue = null;
+    //         if (document.cookie && document.cookie !== "") {
+    //             let cookies = document.cookie.split(";");
+    //             for (let i = 0; i < cookies.length; i++) {
+    //                 let cookie = cookies[i].trim();
+    //                 if (cookie.substring(0, name.length + 1) === name + "=") {
+    //                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //         return cookieValue;
+    //     }
+    // });
+</script>
+{% endblock %}

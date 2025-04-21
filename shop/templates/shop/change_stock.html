@@ -1,0 +1,39 @@
+{% extends 'shop/base.html' %} {% block content %}
+<div class="container">
+    <h2 class="text-center">Change Stock Amounts</h2>
+    <!-- <div style="width: 200px; height: 200px; border: 1px solid black; margin-bottom: 10px;">
+        <img id="product-image" src="" alt="Product Image" style="width: 100%; height: 100%; object-fit: contain;">
+    </div> -->
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Select Product</label>
+            <select id="productSelect" name="product_id" class="form-control" onchange="updateImage()" required>
+                {% for product in products %}
+                <option value="{{ product.id }}" data-image="{{ product.image.url }}">{{ product.title }} (Current Stock: {{ product.stock }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Quantity to Add</label>
+            <input type="number" name="quantity" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Update Stock</button>
+    </form>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        updateImage();
+    });
+
+    function updateImage() {
+        var select = document.getElementById("product");
+        var img = document.getElementById("product-image");
+        var selectedOption = select.options[select.selectedIndex];
+        var imageUrl = selectedOption.getAttribute("data-image");
+        img.src = imageUrl ? imageUrl : "";
+    }
+</script>
+{% endblock %}

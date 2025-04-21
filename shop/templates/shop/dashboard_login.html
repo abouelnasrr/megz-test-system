@@ -1,0 +1,24 @@
+{% extends 'shop/base.html' %} {% block content %}
+
+<div class="container" style="max-width: 400px;">
+    <h2 class="text-center">Dashboard Login</h2>
+
+    {% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+</div>
+
+{% endblock %}
