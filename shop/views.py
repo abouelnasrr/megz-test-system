@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
 import base64
 from django.conf import settings
 from shop.models import Users
@@ -456,3 +456,7 @@ def change_stock(request):
     products = Products.objects.all()
     return render(request, "shop/change_stock.html", {"products": products})
 
+
+
+
+#thank you for seeing my work look out for more , love # aly 
